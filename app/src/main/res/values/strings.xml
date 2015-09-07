@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Context Aware</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">WiFi Settings</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_fact_list">FactList</string>
+    <string name="fact">Fact List</string>
+    <string name="title_activity_context_list">ContextList</string>
+    <string name="contexts">Contexts</string>
+    <string name="add">Add</string>
+    <string name="title_activity_context_editor">ContextEditor</string>
+    <string name="add_app">Add App</string>
+    <string name="add_fact">Add fact</string>
+    <string name="add_rule">Add Rule</string>
+    <string name="enforce">Enforce</string>
+    <string name="refresh">Full refresh</string>
+
+</resources>

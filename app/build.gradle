@@ -1,0 +1,41 @@
+apply plugin: 'com.android.application'
+apply plugin: 'idea'
+
+idea {
+    module {
+        downloadSources = true
+    }
+}
+android {
+    compileSdkVersion 21
+    buildToolsVersion "20.0.0"
+
+    defaultConfig {
+        applicationId "com.tudalex.fingerprint"
+        minSdkVersion 15
+        targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            //runProguard false
+            //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+repositories {
+    maven {
+        url "http://maven.rushorm.com"
+    }
+    mavenCentral()
+}
+
+
+dependencies {
+    compile group: 'com.google.guava', name: 'guava', version: '15.0'
+    compile 'co.uk.rushorm:rushandroid:1.1.9'
+    compile 'eu.chainfire:libsuperuser:1.0.0.+'
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
