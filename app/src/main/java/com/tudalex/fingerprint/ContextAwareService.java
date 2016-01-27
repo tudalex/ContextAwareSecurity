@@ -12,9 +12,17 @@ import com.tudalex.fingerprint.db.Application;
 import com.tudalex.fingerprint.db.Fact;
 import com.tudalex.fingerprint.db.Rule;
 import com.tudalex.fingerprint.db.XPrivacyHelper;
+import com.tudalex.fingerprint.xml.ContextProvider;
+import com.tudalex.fingerprint.xml.ContextRule;
+import com.tudalex.fingerprint.xml.Policy;
+import com.tudalex.fingerprint.xml.PolicyParser;
+import com.tudalex.fingerprint.xml.PolicySet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import co.uk.rushorm.android.AndroidInitializeConfig;
@@ -32,7 +40,7 @@ public class ContextAwareService extends IntentService {
     // TODO: Rename actions, choose action names that describe tasks that this
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     public static final String UPDATE_ACTION = "com.tudalex.fingerprint.UPDATE_FACTS";
-
+    public static final String FACT_UPDATE_ACTION = "com.tudalex.fingerprint.FACT_UPDATE_ACTION";
 
     private static boolean bootstrapped = false;
     private static final String TAG = "ContextAwareService";
@@ -65,7 +73,7 @@ public class ContextAwareService extends IntentService {
 
     public static void updateContext(Context context, String name, Boolean status) {
         Intent intent = new Intent(context, ContextAwareService.class);
-        intent.setAction("update");
+        intent.setAction(FACT_UPDATE_ACTION);
         intent.putExtra("name", name);
         intent.putExtra("active", status);
         context.startService(intent);
@@ -150,7 +158,62 @@ public class ContextAwareService extends IntentService {
         }
         if (modifiedContexts)
             enforceConstraints();
+    }
 
+    private void enforceConstraints2() {
+        PolicySet ps = Utils.parsePolicy();
+        for (ContextProvider cp : ps.contextProviders) {
+            final String sig = Utils.getSignature(this, cp.id);
+            if (!sig.equals(cp.signature)) {
+                Log.i("ContextProviders", "Apk for CP is wrong: " + cp.id);
+                Log.i("ContextProviders", sig + " vs " + cp.signature);
+                Utils.installApk(cp.uri);
+            }
+        }
+        HashMap<String, Boolean> facts = new HashMap<>();
+        for (Fact f : new RushSearch().find(Fact.class)) {
+            facts.put(f.provider + "." + f.name, f.active);
+        }
+        Log.i("FACTS", facts.toString());
+        for (com.tudalex.fingerprint.xml.Context cr : ps.contexts) {
+            for (ContextRule cr2 : cr.rules) {
+                boolean value = true;
+                if (facts.containsKey(cr2.name)) {
+                    if (!facts.get(cr2).equals(cr2.value)) {
+                        value = false;
+                    }
+                } else {
+                    Log.e("CTX", "No key named: "+ cr2.name);
+                }
+                facts.put(cr2.name, value);
+            }
+        }
+
+        for (Policy p : ps.policies) {
+            if (p.combine == "deny-override") {
+                boolean ret = true;
+
+
+                final Application app = new RushSearch().whereEqual("pack", p.target).findSingle(Application.class);
+                final int uidTarget = app.uid;
+                ArrayList<String> deniedCats = new ArrayList<>();
+                for (com.tudalex.fingerprint.xml.Rule r : p.rules) {
+
+                    if (facts.containsKey(r.context)) {
+                        if (facts.get(r.context).equals(false)
+                                && r.effect.equals("deny")) {
+                            deniedCats.add(r.resource);
+                        }
+                    } else {
+                        Log.e("CTX", "No key found in evaluation: " + r.context);
+                    }
+                }
+                for (String cat : deniedCats) {
+                    XPrivacyHelper.setAppClassPermission(app.uid, cat, false);
+                }
+
+            }
+        }
     }
 
     private void enforceConstraints() {
@@ -186,7 +249,7 @@ public class ContextAwareService extends IntentService {
             Log.d(TAG, "Intent "+ intent.toString());
             final String action = intent.getAction();
             switch (action) {
-                case "update":
+                case FACT_UPDATE_ACTION:
                     Fact fact1 = new RushSearch()
                             .whereEqual("name", intent.getStringExtra("name"))
                             .and()
@@ -214,7 +277,8 @@ public class ContextAwareService extends IntentService {
                 case "enforce":
                     refreshFactDB();
                     refreshAppDB();
-                    enforceConstraints();
+                    //enforceConstraints();
+                    enforceConstraints2();
                     break;
                 case "fact":
                     if (new RushSearch()

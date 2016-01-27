@@ -1,21 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.tudalex.fingerprint" >
+    package="com.tudalex.fingerprint">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="biz.bokhorst.xprivacy.MANAGE_XPRIVACY" />
+
+    <permission-tree android:name="com.tudalex.fingerprint.permission" />
+
+    <permission-group android:name="com.tudalex.fingerprint.permission-group.FACT_GROUP" />
+
+    <permission
+        android:name="com.tudalex.fingerprint.permission.FACT_PROVIDER"
+        android:permissionGroup="com.tudalex.fingerprint.permission-group.FACT_GROUP"
+        android:protectionLevel="normal" />
+
+    <uses-permission android:name="com.tudalex.fingerprint.permission.FACT_PROVIDER" />
 
     <application
         android:name=".Application"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
         <activity
             android:name=".gui.MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -29,18 +43,24 @@
         <meta-data
             android:name="Rush_db_version"
             android:value="3" />
-        <meta-data android:name="Rush_log" android:value="true" />
+        <meta-data
+            android:name="Rush_log"
+            android:value="true" />
 
         <service
             android:name=".ContextAwareService"
-            android:exported="true" >
+            android:exported="true"
+            android:permission="com.tudalex.fingerprint.permission.FACT_PROVIDER">
+            <intent-filter>
+                <action android:name="com.tudalex.fingerprint.FACT_UPDATE_ACTION"/>
+            </intent-filter>
         </service>
 
         <receiver
             android:name=".recievers.BootCompleteIntentReciever"
             android:enabled="true"
             android:exported="true"
-            android:process=":background" >
+            android:process=":background">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -48,7 +68,7 @@
         <receiver
             android:name=".recievers.WifiBroadcastReciever"
             android:enabled="true"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.net.wifi.STATE_CHANGE" />
                 <action android:name="com.tudalex.fingerprint.UPDATE_FACTS" />
@@ -57,7 +77,7 @@
         <receiver
             android:name=".recievers.PackageReciever"
             android:enabled="true"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.PACKAGE_ADDED" />
                 <action android:name="android.intent.action.PACKAGE_REMOVED" />
@@ -69,7 +89,7 @@
         <activity
             android:name=".gui.WifiGui"
             android:label="@string/title_activity_main"
-            android:parentActivityName=".gui.MainActivity" >
+            android:parentActivityName=".gui.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".gui.MainActivity" />
@@ -78,13 +98,12 @@
         <receiver
             android:name=".recievers.ScreenStateReciever"
             android:enabled="true"
-            android:exported="false" >
-        </receiver>
+            android:exported="false"></receiver>
 
         <activity
             android:name=".gui.FactList"
             android:label="@string/title_activity_fact_list"
-            android:parentActivityName=".gui.MainActivity" >
+            android:parentActivityName=".gui.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".gui.MainActivity" />
@@ -92,7 +111,7 @@
         <activity
             android:name=".gui.ContextList"
             android:label="@string/title_activity_context_list"
-            android:parentActivityName=".gui.MainActivity" >
+            android:parentActivityName=".gui.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".gui.MainActivity" />
@@ -105,6 +124,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".gui.ContextList" />
         </activity>
+
+        <service
+            android:name=".UpdateService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

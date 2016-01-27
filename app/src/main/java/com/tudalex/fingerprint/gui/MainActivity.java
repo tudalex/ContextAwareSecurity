@@ -9,6 +9,7 @@ import android.view.MenuItem;
 
 import com.tudalex.fingerprint.ContextAwareService;
 import com.tudalex.fingerprint.R;
+import com.tudalex.fingerprint.UpdateService;
 import com.tudalex.fingerprint.db.*;
 import com.tudalex.fingerprint.db.Application;
 
@@ -56,6 +57,10 @@ public class MainActivity extends Activity {
 
         if (id == R.id.enforce) {
             ContextAwareService.enforce(this);
+        }
+
+        if (id == R.id.update_policy) {
+            UpdateService.startUpdate(this);
         }
 
         if (id == R.id.refresh) {

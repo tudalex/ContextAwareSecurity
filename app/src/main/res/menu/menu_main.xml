@@ -9,6 +9,8 @@
         android:orderInCategory="100" android:showAsAction="never" />
     <item android:id="@+id/enforce" android:title="@string/enforce"
         android:orderInCategory="100" android:showAsAction="never" />
+    <item android:id="@+id/update_policy" android:title="@string/update_policy"
+        android:orderInCategory="100" android:showAsAction="never" />
     <item android:id="@+id/refresh" android:title="@string/refresh"
         android:orderInCategory="100" android:showAsAction="never" />
 </menu>
